@@ -1,0 +1,77 @@
+.registration-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.generate-button {
+  background: #28a745;
+  color: white;
+  padding: 12px 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin: 20px 0;
+}
+
+.generate-button:hover {
+  background: #218838;
+}
+
+.id-display {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.id-display h3 {
+  font-size: 24px;
+  color: #007bff;
+  margin: 10px 0;
+}
+
+.warning {
+  color: #dc3545;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.nav-button {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 15px;
+}
+
+.nav-button:hover {
+  background: #0056b3;
+}
+
+.back-button {
+  background: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 20px;
+}
+
+.back-button:hover {
+  background: #5a6268;
+} 
