@@ -1,0 +1,58 @@
+.home-container {
+    text-align: center;
+    padding: 50px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+h2 {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.home-button {
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 250px;
+}
+
+.results-button {
+    background-color: #28a745;
+}
+
+.home-button:hover {
+    opacity: 0.85;
+}
+
+.connect-btn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    color: white;
+    background-color: #ff9800;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.connect-btn:hover {
+    background-color: #e68900;
+}

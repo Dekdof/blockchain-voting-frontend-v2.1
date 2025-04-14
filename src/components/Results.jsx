@@ -1,46 +1,52 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Results.css";
+import "../styles/Results.css";
+import { getBlockchainContract } from "../blockchain";
 
 function Results() {
-  const [voteCounts, setVoteCounts] = useState({});
+  const [voteCounts, setVoteCounts] = useState([]);
+  const [candidates, setCandidates] = useState([]);
   const navigate = useNavigate();
-  const candidates = ["Alice", "Bob", "Charlie", "David"];
 
   useEffect(() => {
-    // Get all votes from localStorage
-    const votedIds = JSON.parse(localStorage.getItem('votedIds') || '[]');
-    const votes = JSON.parse(localStorage.getItem('votes') || '{}');
-    
-    // Count votes for each candidate
-    const counts = candidates.reduce((acc, candidate) => {
-      acc[candidate] = 0;
-      return acc;
-    }, {});
+    const fetchResults = async () => {
+      try {
+        const contract = await getBlockchainContract();
+        if (!contract) return;
 
-    // Count the votes
-    votedIds.forEach(id => {
-      if (votes[id]) {
-        counts[votes[id]] = (counts[votes[id]] || 0) + 1;
+        const totalCandidates = 4; // Your contract has 4 candidates
+        let fetchedCandidates = [];
+        let fetchedVoteCounts = [];
+
+        for (let i = 0; i < totalCandidates; i++) {
+          const [name, count] = await contract.getCandidate(i);
+          fetchedCandidates.push(name);
+          fetchedVoteCounts.push(Number(count)); // Convert BigNumber to number
+        }
+
+        setCandidates(fetchedCandidates);
+        setVoteCounts(fetchedVoteCounts);
+      } catch (error) {
+        console.error("Error fetching results:", error);
       }
-    });
+    };
 
-    setVoteCounts(counts);
+    fetchResults();
   }, []);
 
   return (
     <div className="results-container">
       <h2>📊 Election Results</h2>
       <div className="results-grid">
-        {candidates.map(candidate => (
-          <div key={candidate} className="result-card">
+        {candidates.map((candidate, index) => (
+          <div key={index} className="result-card">
             <h3>{candidate}</h3>
-            <div className="vote-count">{voteCounts[candidate] || 0}</div>
+            <div className="vote-count">{voteCounts[index] || 0}</div>
             <div className="vote-label">votes</div>
           </div>
         ))}
       </div>
-      <button className="back-button" onClick={() => navigate('/')}>
+      <button className="back-button" onClick={() => navigate("/")}>
         Back to Home
       </button>
     </div>

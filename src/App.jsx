@@ -1,15 +1,13 @@
-import { Routes, Route } from "react-router-dom";
-import HomePage from "./components/HomePage";
-import IdentityVerification from "./components/IdentityVerification";
-import VoterRegistration from "./components/VoterRegistration";
-import VotingForm from "./components/VotingForm";
-import Results from "./components/Results";
-import "./App.css"; // Import global CSS
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./components/HomePage.jsx";
+import VoterRegistration from "./components/VoterRegistration.jsx";
+import IdentityVerification from "./components/IdentityVerification.jsx";
+import VotingForm from "./components/VotingForm.jsx";
+import Results from "./components/Results.jsx";
 
 function App() {
   return (
-    <div className="app-container">
-      <h1>🔗 Blockchain Voting System</h1>
+    <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<VoterRegistration />} />
@@ -17,7 +15,7 @@ function App() {
         <Route path="/vote" element={<VotingForm />} />
         <Route path="/results" element={<Results />} />
       </Routes>
-    </div>
+    </Router>
   );
 }
 

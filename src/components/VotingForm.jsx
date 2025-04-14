@@ -1,59 +1,82 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./VotingForm.css"; // Import CSS
+import "../styles/VotingForm.css";
+import { getBlockchainContract } from "../blockchain";
 
 const VotingForm = () => {
-  const [candidate, setCandidate] = useState("");
+  const [candidateIndex, setCandidateIndex] = useState("");
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const candidates = ["Alice", "Bob", "Charlie", "David"]; // Added "David" as the fourth candidate
+  const voterId = sessionStorage.getItem("currentVoterId");
 
-  // Check if user has already voted when component mounts
   useEffect(() => {
-    const currentVoterId = localStorage.getItem('currentVoterId');
-    const votedIds = JSON.parse(localStorage.getItem('votedIds') || '[]');
-    
-    if (votedIds.includes(currentVoterId)) {
-      alert("You have already voted!");
-      navigate('/');
-    }
-  }, [navigate]);
+    const fetchCandidates = async () => {
+      try {
+        const contract = await getBlockchainContract();
+        if (!contract) return;
+
+        const totalCandidates = 4; // Your contract has 4 candidates
+        let fetchedCandidates = [];
+
+        for (let i = 0; i < totalCandidates; i++) {
+          const [name] = await contract.getCandidate(i);
+          fetchedCandidates.push(name);
+        }
+
+        setCandidates(fetchedCandidates);
+      } catch (error) {
+        console.error("Error fetching candidates:", error);
+      }
+    };
+
+    fetchCandidates();
+  }, []);
 
   const handleVote = async () => {
-    const currentVoterId = localStorage.getItem('currentVoterId');
-    const votedIds = JSON.parse(localStorage.getItem('votedIds') || '[]');
-    
-    if (votedIds.includes(currentVoterId)) {
-      alert("You have already voted!");
-      navigate('/');
+    if (!candidateIndex) {
+      alert("Please select a candidate.");
+      return;
+    }
+    if (!voterId) {
+      alert("No voter ID found. Please verify your identity again.");
+      navigate("/verify");
       return;
     }
 
-    // Store the ID as voted
-    localStorage.setItem('votedIds', JSON.stringify([...votedIds, currentVoterId]));
-    
-    // Store the vote
-    const votes = JSON.parse(localStorage.getItem('votes') || '{}');
-    votes[currentVoterId] = candidate;
-    localStorage.setItem('votes', JSON.stringify(votes));
-    
-    alert(`You voted for ${candidate}`);
-    navigate('/');
+    setLoading(true);
+    try {
+      const contract = await getBlockchainContract();
+      if (!contract) return;
+
+      const tx = await contract.vote(voterId, candidateIndex);
+      await tx.wait(); // Wait for transaction confirmation
+
+      alert("Your vote has been cast successfully!");
+      sessionStorage.removeItem("currentVoterId"); // Clear voter session
+      navigate("/");
+    } catch (error) {
+      console.error("Voting error:", error);
+      alert("Error casting vote. Make sure MetaMask is connected.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="voting-container">
       <h2>🗳️ Vote for Your Candidate</h2>
       <label>Select a Candidate:</label>
-      <select value={candidate} onChange={(e) => setCandidate(e.target.value)}>
+      <select value={candidateIndex} onChange={(e) => setCandidateIndex(e.target.value)}>
         <option value="">-- Choose --</option>
-        {candidates.map((c, index) => (
-          <option key={index} value={c}>{c}</option>
+        {candidates.map((name, index) => (
+          <option key={index} value={index}>{name}</option>
         ))}
       </select>
-      <button className="vote-button" onClick={handleVote} disabled={!candidate}>
-        Cast Vote
+      <button className="vote-button" onClick={handleVote} disabled={loading || !candidateIndex}>
+        {loading ? "Submitting..." : "Cast Vote"}
       </button>
-      <button className="back-button" onClick={() => navigate('/')}>
+      <button className="back-button" onClick={() => navigate("/")}>
         Back to Home
       </button>
     </div>

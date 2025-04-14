@@ -1,33 +1,49 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./IdentityVerification.css"; // Import CSS
+import "../styles/IdentityVerification.css";
+import { getBlockchainContract } from "../blockchain";
 
 function IdentityVerification() {
   const [userId, setUserId] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleVerify = () => {
-    const validIds = JSON.parse(localStorage.getItem('validVoterIds') || '[]');
-    const votedIds = JSON.parse(localStorage.getItem('votedIds') || '[]');
-    
+  const handleVerify = async () => {
     if (!userId.trim()) {
       alert("Please enter a Voter ID.");
       return;
     }
 
-    if (!validIds.includes(userId.trim())) {
-      alert("Please enter a valid Voter ID.");
-      return;
-    }
+    setLoading(true);
+    try {
+      const contract = await getBlockchainContract();
+      if (!contract) return;
 
-    if (votedIds.includes(userId.trim())) {
-      alert("This ID has already been used to vote!");
-      return;
-    }
+      // Check if voter is registered
+      const isRegistered = await contract.isRegistered(userId);
+      if (!isRegistered) {
+        alert("This ID is not registered!");
+        setLoading(false);
+        return;
+      }
 
-    // Store the current voter's ID
-    localStorage.setItem('currentVoterId', userId.trim());
-    navigate("/vote");
+      // Check if voter has already voted
+      const hasVoted = await contract.hasVoterVoted(userId);
+      if (hasVoted) {
+        alert("This ID has already been used to vote!");
+        setLoading(false);
+        return;
+      }
+
+      // Store current voter ID in session storage
+      sessionStorage.setItem("currentVoterId", userId);
+      navigate("/vote");
+    } catch (error) {
+      console.error("Verification error:", error);
+      alert("Error verifying voter ID. Make sure MetaMask is connected.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,10 +56,10 @@ function IdentityVerification() {
         onChange={(e) => setUserId(e.target.value.toUpperCase())}
         placeholder="Enter your ID..."
       />
-      <button className="verify-button" onClick={handleVerify}>
-        Verify & Proceed
+      <button className="verify-button" onClick={handleVerify} disabled={loading}>
+        {loading ? "Verifying..." : "Verify & Proceed"}
       </button>
-      <button className="back-button" onClick={() => navigate('/')}>
+      <button className="back-button" onClick={() => navigate("/")}>
         Back to Home
       </button>
     </div>
